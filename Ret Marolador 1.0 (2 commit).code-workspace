@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "Ret Marolador 1.0"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"java.server.launchMode": "Standard"
+	}
+}
