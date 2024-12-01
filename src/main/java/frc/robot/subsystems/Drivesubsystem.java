@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX; 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.hal.EncoderJNI;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -18,12 +19,13 @@ public class Drivesubsystem extends SubsystemBase {
      private final VictorSPX rightboss = new VictorSPX(2);
      private final TalonSRX leftslave = new TalonSRX(3);
      private final TalonSRX rightslave = new TalonSRX(4);
-     private final Encoder leftEncoder = new Encoder (0, 1)
+     private final Encoder leftEncoder = new Encoder (0, 1);
      private final Encoder rightEncoder = new Encoder (1, 0);
 
     public double getEnconderMeters() {
         return leftEncoder.get() + -rightEncoder.get();
       }
+      
 
     public Drivesubsystem () {
       leftboss.setInverted (true);
@@ -33,14 +35,13 @@ public class Drivesubsystem extends SubsystemBase {
 
       leftEncoder.setReverseDirection(false);
       rightEncoder.setReverseDirection(true);
-
     }
 
+    public void drive (double leftspeed, double rightspeed) {
+      leftboss.set (ControlMode.PercentOutput, leftspeed);
+      rightboss.set (ControlMode.PercentOutput,-rightspeed);
 
-    public void setMotors (double leftspeed, double rightspeed) {
-      leftboss.ser (leftspeed)
     }
-
     }
      
 
