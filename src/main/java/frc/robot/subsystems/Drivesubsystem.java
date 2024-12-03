@@ -10,22 +10,33 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.hal.EncoderJNI;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.math.controller.PIDController;
+
 
 public class Drivesubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
+ //Declarando motores e encoders
      private final VictorSPX leftboss = new VictorSPX(1);
      private final VictorSPX rightboss = new VictorSPX(2);
      private final TalonSRX leftslave = new TalonSRX(3);
      private final TalonSRX rightslave = new TalonSRX(4);
+     private final DifferentialDrive drive = new DifferentialDrive (leftboss, rightboss);
+
      private final Encoder leftEncoder = new Encoder (0, 1);
      private final Encoder rightEncoder = new Encoder (1, 0);
 
-    public double getEnconderMeters() {
-        return leftEncoder.get() + -rightEncoder.get();
-      }
-      
+     // Declaração dos controladores PID 
+     private final PIDController leftPIDController = new PIDController(0.1, 0.0, 0.0); 
+     private final PIDController rightPIDController = new PIDController(0.1, 0.0, 0.0); 
+
+     // Setpoints iniciais para os controladores PID
+
+      private double leftSetpoint = 0; 
+      private double rightSetpoint = 0;
+
+     public double getEncoderMeters() {
+      return (leftEncoder.getDistance() + rightEncoder.getDistance()) / 2.0;
+    }
 
     public Drivesubsystem () {
       leftboss.setInverted (true);
@@ -35,6 +46,10 @@ public class Drivesubsystem extends SubsystemBase {
 
       leftEncoder.setReverseDirection(false);
       rightEncoder.setReverseDirection(true);
+
+      // Configura os setpoints iniciais dos controladores PID
+       leftPIDController.setSetpoint(leftSetpoint); 
+       rightPIDController.setSetpoint(rightSetpoint);
     }
 
     public void drive (double leftspeed, double rightspeed) {
@@ -42,40 +57,28 @@ public class Drivesubsystem extends SubsystemBase {
       rightboss.set (ControlMode.PercentOutput,-rightspeed);
 
     }
+    public void arcadeDrive (double fwd, double rot) {
+      drive.arcadeDrive(fwd, rot);
     }
+
+    public void driveWithPID(double leftSetpoint, double rightSetpoint) {
+      double leftOutput = leftPIDController.calculate(leftEncoder.getRate(), leftSetpoint);
+      double rightOutput = rightPIDController.calculate(rightEncoder.getRate(), rightSetpoint);
+  
+      leftboss.set(ControlMode.PercentOutput, leftOutput);
+      rightboss.set(ControlMode.PercentOutput, rightOutput);
+    }
+
+    @Override
+    public void periodic() {
+       // Atualiza os controladores PID com os setpoints atuais 
+    driveWithPID(leftSetpoint, rightSetpoint);
+  }
+    
+    }
+  
+    
+
      
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
-  }
-
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
-  }
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
-}
+ 
